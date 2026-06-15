@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字看板</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #0d0d2b 100%);
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+
+    .dashboard {
+      background: rgba(20, 20, 50, 0.9);
+      border: 2px solid rgba(100, 140, 255, 0.3);
+      border-radius: 24px;
+      padding: 48px 56px;
+      box-shadow:
+        0 0 60px rgba(60, 100, 255, 0.15),
+        0 0 120px rgba(60, 100, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    .dashboard h1 {
+      text-align: center;
+      color: #8899cc;
+      font-size: 1.6rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      margin-bottom: 40px;
+      text-transform: uppercase;
+    }
+
+    .board {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .row-label {
+      width: 80px;
+      color: #7799cc;
+      font-size: 1.05rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid rgba(100, 140, 255, 0.25);
+      border-radius: 14px;
+      background: rgba(10, 10, 30, 0.7);
+      color: #e0e8ff;
+      font-size: 2rem;
+      font-weight: 600;
+      font-family: 'Consolas', 'SF Mono', 'Microsoft YaHei', monospace;
+      text-align: center;
+      letter-spacing: 0.05em;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .input-wrapper input:focus {
+      border-color: rgba(100, 160, 255, 0.7);
+      box-shadow: 0 0 30px rgba(60, 120, 255, 0.2), 0 0 60px rgba(60, 120, 255, 0.08);
+    }
+
+    .input-wrapper input.input-field {
+      caret-color: #4488ff;
+    }
+
+    .output-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .output-display {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid rgba(0, 220, 130, 0.3);
+      border-radius: 14px;
+      background: rgba(0, 30, 20, 0.5);
+      color: #00ff88;
+      font-size: 2rem;
+      font-weight: 600;
+      font-family: 'Consolas', 'SF Mono', 'Microsoft YaHei', monospace;
+      text-align: center;
+      letter-spacing: 0.05em;
+      min-height: 71px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .output-display.has-value {
+      text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+      box-shadow: 0 0 30px rgba(0, 220, 130, 0.12);
+    }
+
+    .output-display.placeholder {
+      color: rgba(0, 200, 120, 0.25);
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    .formula-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 36px;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      color: #6677aa;
+      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+    }
+
+    .formula-hint .arrow {
+      color: #4488cc;
+      font-size: 1.3rem;
+    }
+
+    .formula-hint .result-highlight {
+      color: #00ff88;
+      font-weight: 600;
+    }
+
+    /* 动画脉冲 */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .calculating .output-display {
+      animation: pulse 0.6s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <h1>📊 数字看板</h1>
+
+  <div class="board">
+    <!-- 输入行 -->
+    <div class="row">
+      <span class="row-label">输入</span>
+      <div class="input-wrapper">
+        <input
+          type="number"
+          id="inputNumber"
+          class="input-field"
+          placeholder="输入数字..."
+          autofocus
+        >
+      </div>
+    </div>
+
+    <!-- 输出行 -->
+    <div class="row">
+      <span class="row-label">输出</span>
+      <div class="output-wrapper">
+        <div id="outputDisplay" class="output-display placeholder">
+          —
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 公式提示 -->
+  <div class="formula-hint">
+    <span>输入</span>
+    <span class="arrow">+ 2 →</span>
+    <span class="result-highlight" id="formulaPreview">—</span>
+  </div>
+</div>
+
+<script>
+  const inputEl = document.getElementById('inputNumber');
+  const outputEl = document.getElementById('outputDisplay');
+  const formulaPreviewEl = document.getElementById('formulaPreview');
+  const dashboard = document.querySelector('.dashboard');
+
+  inputEl.addEventListener('input', () => {
+    const rawValue = inputEl.value.trim();
+
+    if (rawValue === '') {
+      // 清空状态
+      outputEl.textContent = '—';
+      outputEl.classList.remove('has-value');
+      outputEl.classList.add('placeholder');
+      formulaPreviewEl.textContent = '—';
+      return;
+    }
+
+    const num = parseFloat(rawValue);
+
+    if (isNaN(num)) {
+      outputEl.textContent = '无效数字';
+      outputEl.classList.remove('has-value');
+      outputEl.classList.add('placeholder');
+      formulaPreviewEl.textContent = '—';
+      return;
+    }
+
+    // 核心逻辑：输出 = 输入 + 2
+    const result = num + 2;
+
+    // 保留合适的小数位数
+    const formattedResult = Number.isInteger(num) && Number.isInteger(result)
+      ? result.toString()
+      : result.toFixed(6).replace(/0+$/, '').replace(/\.$/, '');
+
+    outputEl.textContent = formattedResult;
+    outputEl.classList.add('has-value');
+    outputEl.classList.remove('placeholder');
+
+    // 更新公式预览
+    formulaPreviewEl.textContent = result;
+
+    // 脉冲动画
+    outputEl.parentElement.parentElement.classList.add('calculating');
+    setTimeout(() => {
+      outputEl.parentElement.parentElement.classList.remove('calculating');
+    }, 600);
+  });
+</script>
+
+</body>
+</html>
